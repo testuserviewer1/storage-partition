@@ -3,18 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://atul22.github.io/origin-trial-1/trial.js"></script>
     <title>Button Click Example</title>
 </head>
 <body>
 
-    <button id="myButton">Set Local Storage</button>
+    <button id="myButton">Load iframe</button>
+    <div id="iframeContainer"></div>
     <script>
         // Get a reference to the button element by its ID
         var button = document.getElementById('myButton');
 
         // Add an onclick event listener to the button
         button.onclick = function() {
-            localStorage.setItem("Storage Partition", "Test");
+
+            // Log a message to the console when the button is clicked
+            const iframe = document.createElement("iframe");
+            iframe.src = "https://atul22.github.io/origin-trial-1/";
+            iframe.style.width = "200px";
+            iframe.style.height = "100px";
+            iframe.style.border = "1px solid #ccc"; // Set border or other styles
+            document.getElementById("iframeContainer").appendChild(iframe);
         };
     </script>
 
