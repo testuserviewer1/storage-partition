@@ -9,7 +9,7 @@
       content="What we know — and what we still don't — about the universe's strangest objects."
     />
 
-    <link rel="preconnect" href="https://documentservices.adobe.com" />
+    <link rel="preconnect" href="https://acrobat.adobe.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -470,14 +470,16 @@
       </article>
     </div>
 
-    <script src="https://acrobat.adobe.com/spaces-sdk/main.js"></script>
     <script>
       (function () {
         var params = new URLSearchParams(window.location.search);
-        var clientId = params.get('clientId') || 'PARTNER_CLIENT_ID';
+        var sdkUrl =
+          params.get('sdk') ||
+          'https://acrobat.adobe.com/spaces-sdk/main.js';
+        var clientId = params.get('clientId') || 'dc-stage-embed-spaces';
         var spaceId =
           params.get('spaceId') ||
-          'urn:aaid:sc:VA6C2:ae49fff7-81bb-3416-bad3-ad02a511038c';
+          'urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b';
 
         function boot() {
           if (!window.AdobeSpaces || !window.AdobeSpaces.View) {
@@ -509,11 +511,23 @@
           view.render('adobe-spaces-view');
         }
 
-        if (window.AdobeSpaces && window.AdobeSpaces.View) {
-          boot();
-        } else {
-          document.addEventListener('adobe_spaces.ready', boot, { once: true });
+        function loadSdk() {
+          if (window.AdobeSpaces && window.AdobeSpaces.View) {
+            boot();
+            return;
+          }
+          var tag = document.createElement('script');
+          tag.src = sdkUrl;
+          tag.async = false;
+          tag.onload = boot;
+          tag.onerror = function () {
+            console.warn('[adobe-spaces] failed to load SDK from', sdkUrl);
+          };
+          document.head.appendChild(tag);
         }
+
+        document.addEventListener('adobe_spaces.ready', boot, { once: true });
+        loadSdk();
       })();
     </script>
   </body>
