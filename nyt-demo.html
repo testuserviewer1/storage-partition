@@ -477,9 +477,13 @@
           params.get('sdk') ||
           'https://acrobat.adobe.com/spaces-sdk/main.js';
         var clientId = params.get('clientId') || 'dc-stage-embed-spaces';
-        var spaceId =
-          params.get('spaceId') ||
-          'urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b';
+        // spaceUrl (direct mode) bypasses the embed allowlist check — use until
+        // the allowlist JSON is deployed for the test space.
+        // Pass ?spaceId= to switch to ID mode once allowlist is configured.
+        var spaceUrl =
+          params.get('spaceUrl') ||
+          'https://acrobat.adobe.com/link/spaces/urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b/';
+        var spaceId = params.get('spaceId') || null;
 
         function boot() {
           if (!window.AdobeSpaces || !window.AdobeSpaces.View) {
@@ -487,16 +491,23 @@
             return;
           }
 
-          var view = new AdobeSpaces.View({
+          var config = {
             clientId: clientId,
-            spaceId: spaceId,
             layout: 'inline',
             initialState: 'collapsed',
             collapsedHeight: '72px',
             expandedHeight: '80vh',
             width: '100%',
             autoResize: true,
-          });
+          };
+          // spaceId mode uses the allowlist check; spaceUrl (direct) mode skips it.
+          if (spaceId) {
+            config.spaceId = spaceId;
+          } else {
+            config.spaceUrl = spaceUrl;
+          }
+
+          var view = new AdobeSpaces.View(config);
 
           view.on('ready', function (d) {
             console.log('[adobe-spaces] ready', d);
