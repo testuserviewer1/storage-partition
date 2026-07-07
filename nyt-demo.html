@@ -484,6 +484,15 @@
           params.get('spaceUrl') ||
           'https://acrobat.adobe.com/link/spaces/urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b/';
         var spaceId = params.get('spaceId') || null;
+        // bypassEmbedAllowlist: skip SDK-level allowlist precheck — useful for ephemeral
+        // testing where the allowlist JSON is not deployed. Pass ?bypassEmbedAllowlist
+        // or ?bypassEmbedAllowlist=true to enable. Handle CSP frame-ancestors via ModHeader.
+        var bypassEmbedAllowlist =
+          params.get('bypassEmbedAllowlist') === 'true' || params.has('bypassEmbedAllowlist');
+        // hostBundleUrl: override the web-platform-host.js URL the shell loads.
+        // Use to point at a KW dropin ephemeral without rebuilding spaces-sdk.
+        // Example: ?hostBundleUrl=https://stage.acrobat.adobe.com/ephemeral/dc-knowledge-workspace-dropin/{BUILD}/{VERSION}/web-platform-host.js
+        var hostBundleUrl = params.get('hostBundleUrl') || null;
 
         function boot() {
           if (!window.AdobeSpaces || !window.AdobeSpaces.View) {
@@ -498,8 +507,10 @@
             expandedHeight: '80vh',
             width: '100%',
             autoResize: true,
+            bypassEmbedAllowlist: bypassEmbedAllowlist,
           };
-          // spaceId mode uses the allowlist check; spaceUrl (direct) mode skips it.
+          if (hostBundleUrl) config.hostBundleUrl = hostBundleUrl;
+          // spaceId mode uses the KW dropin shell; spaceUrl (direct) mode frames the URL directly.
           if (spaceId) {
             config.spaceId = spaceId;
           } else {
