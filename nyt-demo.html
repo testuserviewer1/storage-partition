@@ -472,27 +472,13 @@
 
     <script>
       (function () {
-        var params = new URLSearchParams(window.location.search);
-        var sdkUrl =
-          params.get('sdk') ||
-          'https://acrobat.adobe.com/spaces-sdk/main.js';
-        var clientId = params.get('clientId') || 'dc-stage-embed-spaces';
-        // spaceUrl (direct mode) bypasses the embed allowlist check — use until
-        // the allowlist JSON is deployed for the test space.
-        // Pass ?spaceId= to switch to ID mode once allowlist is configured.
-        var spaceUrl =
-          params.get('spaceUrl') ||
-          'https://acrobat.adobe.com/link/spaces/urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b/';
-        var spaceId = params.get('spaceId') || null;
-        // bypassEmbedAllowlist: skip SDK-level allowlist precheck — useful for ephemeral
-        // testing where the allowlist JSON is not deployed. Pass ?bypassEmbedAllowlist
-        // or ?bypassEmbedAllowlist=true to enable. Handle CSP frame-ancestors via ModHeader.
-        var bypassEmbedAllowlist =
-          params.get('bypassEmbedAllowlist') === 'true' || params.has('bypassEmbedAllowlist');
-        // hostBundleUrl: override the web-platform-host.js URL the shell loads.
-        // Use to point at a KW dropin ephemeral without rebuilding spaces-sdk.
-        // Example: ?hostBundleUrl=https://stage.acrobat.adobe.com/ephemeral/dc-knowledge-workspace-dropin/{BUILD}/{VERSION}/web-platform-host.js
-        var hostBundleUrl = params.get('hostBundleUrl') || null;
+        // Update these directly and redeploy to point at a different ephemeral/SDK build.
+        var sdkUrl = 'https://stage.acrobat.adobe.com/spaces-sdk/main.js';
+        var clientId = 'dc-stage-embed-spaces';
+        var spaceId = 'urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b';
+        var bypassEmbedAllowlist = true;
+        // KW dropin ephemeral's web-platform-host.js. Rebuild-free way to point at a
+        var hostBundleUrl = 'https://stage.acrobat.adobe.com/ephemeral/dc-knowledge-workspace-dropin/1783716518-8254/4.34.0_0.0.0-ephemeral.1783716518-8254/web-platform-host.js';
 
         function boot() {
           if (!window.AdobeSpaces || !window.AdobeSpaces.View) {
@@ -502,20 +488,15 @@
 
           var config = {
             clientId: clientId,
+            spaceId: spaceId,
             layout: 'inline',
             initialState: 'expanded',
             expandedHeight: '80vh',
             width: '100%',
             autoResize: true,
             bypassEmbedAllowlist: bypassEmbedAllowlist,
+            hostBundleUrl: hostBundleUrl,
           };
-          if (hostBundleUrl) config.hostBundleUrl = hostBundleUrl;
-          // spaceId mode uses the KW dropin shell; spaceUrl (direct) mode frames the URL directly.
-          if (spaceId) {
-            config.spaceId = spaceId;
-          } else {
-            config.spaceUrl = spaceUrl;
-          }
 
           var view = new AdobeSpaces.View(config);
 
