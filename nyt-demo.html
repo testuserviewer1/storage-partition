@@ -9,7 +9,7 @@
       content="What we know — and what we still don't — about the universe's strangest objects."
     />
 
-    <link rel="preconnect" href="https://acrobat.adobe.com" />
+    <link rel="preconnect" href="https://documentservices.adobe.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -472,30 +472,41 @@
 
     <script>
       (function () {
-        // Update these directly and redeploy to point at a different ephemeral/SDK build.
-        var sdkUrl = 'https://stage.acrobat.adobe.com/spaces-sdk/main.js';
-        var clientId = 'dc-stage-embed-spaces';
-        var spaceId = 'urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b';
-        var bypassEmbedAllowlist = true;
-        // KW dropin ephemeral's web-platform-host.js. Rebuild-free way to point at a
-        var hostBundleUrl = 'https://stage.acrobat.adobe.com/dc-knowledge-workspace-dropin/4.34.0_6.1149.0/web-platform-host.js';
+        var params = new URLSearchParams(window.location.search);
+        // Production default. QA: ?sdk=https://stage.documentservices.adobe.com/... or ephemeral URL.
+        var sdkUrl =
+          params.get('sdk') ||
+          'https://documentservices.adobe.com/spaces-sdk/main.js';
+        var spaceId =
+          params.get('spaceId') ||
+          'urn:aaid:sc:US:48c94977-9292-45e0-9564-0a68b795619b';
+
+        // Warm up connection to whichever SDK host ?sdk= selects (prod by default).
+        try {
+          var sdkOrigin = new URL(sdkUrl).origin;
+          var preconnect = document.createElement('link');
+          preconnect.rel = 'preconnect';
+          preconnect.href = sdkOrigin;
+          document.head.appendChild(preconnect);
+        } catch (_e) {
+          /* ignore malformed ?sdk= */
+        }
 
         function boot() {
-          if (!window.AdobeSpaces || !window.AdobeSpaces.View) {
-            console.warn('[adobe-spaces] SDK not loaded');
-            return;
-          }
-
           var config = {
-            clientId: clientId,
             spaceId: spaceId,
             layout: 'inline',
             initialState: 'expanded',
             width: '100%',
             autoResize: true,
-            bypassEmbedAllowlist: bypassEmbedAllowlist,
-            hostBundleUrl: hostBundleUrl,
           };
+
+          // Dev / ephemeral QA only — not for production partner pages.
+          var hostBundleUrl = params.get('hostBundleUrl');
+          if (hostBundleUrl) config.hostBundleUrl = hostBundleUrl;
+          if (params.get('bypassEmbedAllowlist') === 'true') {
+            config.bypassEmbedAllowlist = true;
+          }
 
           var view = new AdobeSpaces.View(config);
 
@@ -512,23 +523,18 @@
           view.render('adobe-spaces-view');
         }
 
-        function loadSdk() {
-          if (window.AdobeSpaces && window.AdobeSpaces.View) {
-            boot();
-            return;
-          }
+        document.addEventListener('adobe_spaces.ready', boot, { once: true });
+
+        if (window.AdobeSpaces && window.AdobeSpaces.View) {
+          boot();
+        } else {
           var tag = document.createElement('script');
           tag.src = sdkUrl;
-          tag.async = false;
-          tag.onload = boot;
           tag.onerror = function () {
             console.warn('[adobe-spaces] failed to load SDK from', sdkUrl);
           };
           document.head.appendChild(tag);
         }
-
-        document.addEventListener('adobe_spaces.ready', boot, { once: true });
-        loadSdk();
       })();
     </script>
   </body>
