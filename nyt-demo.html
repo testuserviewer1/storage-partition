@@ -320,9 +320,10 @@
 
       #adobe-spaces-view {
         width: 100%;
+        max-width: 100%;
         min-height: 72px;
         border-radius: 12px;
-        overflow: visible;
+        overflow: hidden;
         background: #fff;
         border: 1px solid rgba(0, 0, 0, 0.08);
         box-shadow:
@@ -492,13 +493,19 @@
           /* ignore malformed ?sdk= */
         }
 
+        var booted = false;
         function boot() {
+          if (booted) return;
+          booted = true;
+
           var config = {
             spaceId: spaceId,
             layout: 'inline',
+            initialState: 'expanded',
             expandedHeight: '80vh',
             width: '100%',
-            autoResize: true,
+            // kw-embedded scrolls inside a fixed viewport — do not shrink to content height.
+            autoResize: false,
           };
 
           // Dev / ephemeral QA only — not for production partner pages.
