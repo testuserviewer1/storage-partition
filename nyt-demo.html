@@ -477,10 +477,10 @@
         // Production default. QA: ?sdk=https://stage.documentservices.adobe.com/... or ephemeral URL.
         var sdkUrl =
           params.get('sdk') ||
-          'https://documentservices.adobe.com/spaces-sdk/main.js';
+          'https://stage.acrobat.adobe.com/ephemeral/spaces-sdk/1784564989-18687/1.0.4/main.js';
         var spaceId =
           params.get('spaceId') ||
-          'urn:aaid:sc:VA6C2:2858b08d-a491-35ea-9af4-8c5be8f5c2db';
+          'urn:aaid:sc:VA6C2:33cd0379-6281-3305-a54c-9921a169c2d7';
 
         // Warm up connection to whichever SDK host ?sdk= selects (prod by default).
         try {
